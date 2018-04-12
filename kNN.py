@@ -48,21 +48,30 @@ def pearson(dataA, dataB):
 def kNN(data, measure, k = None):
     #simulatedData = [[round(np.corrcoef(i,j)[0,1],3) for j in data] for i in data]
     simulatedData = [[round(measure(i,j),3) for j in data] for i in data]
+    print("Similarity Data")
+    for i in simulatedData:
+        print(i)
     newData = []
     for i in range(len(data)):
         newData.append([])
         for j in range(len(data[i])):
             if(data[i][j] == 0):
                 userCol = [(simulatedData[i][k], k) for k in range(len(simulatedData[i]))]
-                userCol.sort()
-                taken = userCol[:k]
-                #print(taken)
-                #print()
+                print(userCol)
+                userCol.sort(reverse = True)
+                print(userCol)
+                taken = userCol[1:k+1]
+                print(taken)
+                #print(data)
+                
                 predictingMean = np.mean([k for k in data[i] if k != 0])
                 similarUserMean = [np.mean([l for l in data[k[1]] if l != 0]) for k in taken]
-                #print(similarUserMean)
-                numerator = sum([simulatedData[i][taken[k][1]]*(data[i][taken[k][1]] - similarUserMean[k]) for k in range(len(taken))])
-                denominator = sum([simulatedData[i][taken[k][1]] for k in range(len(taken))])
+                print("SimilarUserMean")
+                print(similarUserMean)
+                #print([data[i][taken[k][1]] for k in range(len(taken))])
+                print()
+                numerator = sum([simulatedData[i][taken[k][1]]*(data[taken[k][1]][j] - similarUserMean[k]) for k in range(len(taken))])
+                denominator = sum([simulatedData[i][taken[k][1]] for k in range(len(taken))])   
                 #print([simulatedData[i][taken[k][1]] for k in range(len(taken))])
                 #print()
                 res = predictingMean + numerator/denominator
@@ -91,21 +100,18 @@ for i in table4:
     print(i)
 '''
 
-A = [1,4,5,0,3]
-B = [5,1,0,5,2]
-C = [4,1,2,5,0]
-D = [0,3,4,0,4]
+def readFile(fileString):
+    return np.loadtxt(fileString, delimiter=" ", dtype = "int").tolist()
 
-data = [A,B,C,D]
+if __name__ == "__main__":
+    fileString = r'F:\Tut\Sem6\Information System\testData\test1.txt'
+    data = readFile(fileString)
+    print("DATA:")
+    for i in data:
+        print(i)
 
-table = [[round(cosine(i,j),3) for j in data] for i in data]
-for i in table:
-    print(i)
+    print("KNN Pearson:")
+    blah = kNN(data, cosine, 2)
+    for i in blah:
+        print(i)
 
-print()
-for i in data:
-    print(i)
-print()
-blah = kNN(data, pearson, 2)
-for i in blah:
-    print(i)
