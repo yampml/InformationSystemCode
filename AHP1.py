@@ -8,19 +8,26 @@ def load_units(file):
             units.append(line.split()[0]) # Used to deal with '\n'
         return units
 
-def cross_compare(units):
-    n = len(units)
+def read_data(units, fromLine = None):
+    n = int(units[0])
     A = np.zeros((n, n))
+    dem = 1
+    if (fromLine != None):
+        dem = fromLine
+
+    print(dem)
     for i in range(0, n):
         for j in range(i, n):
             if i == j:
                 scale = 1
             else:
-                scale = float(Fraction(input(units[i]+' to '+units[j]+':')))
+                scale = float(Fraction(units[dem]))
+                dem += 1
+                
             A[i][j] = scale
             A[j][i] = float(1/scale)
     return A
-
+    
 def get_weight(A, getfrom):
     '''
     A: input matrix
@@ -56,34 +63,34 @@ def get_weight(A, getfrom):
     print('CR = %f'%CR)
     if CR >= 0.1:
         print("Failed in Consistency check.")
-        exit = input("Enter 'q' to quit.")
         raise
     return priority, CR
 
 if __name__ == '__main__':
-    goal = input("Your Goal: ")
     criterions = load_units('criterions.txt')
     alternatives = load_units('alternatives.txt')
-    n2 = len(criterions)
-    n3 = len(alternatives)
-    A = cross_compare(criterions)
+    n2 = int(criterions[0])
+    n3 = int(alternatives[0])
+    A = read_data(criterions)
 
     print()
     W2, cr2 = get_weight(A,0)
     B = {}
     W3 = np.zeros((n2, n3))
+    fromLine = 1
     for i in range(n2):
         print("######################")
-        print("Consider "+criterions[i])
-        B[str(i)] = cross_compare(alternatives)
+        print("Consider criterions", i+1)
+        B[str(i)] = read_data(alternatives, fromLine)
+        fromLine += int((n3*n3-n3)/2)
         w3 = get_weight(B[str(i)],1)
         W3[i] = w3
-    W = np.dot(W2, W3)
-
+    W = W2.T.dot(W3)
+    print(W3)
     print("######################")
     print("The final Weight:")
     print(W)
     W = [(W[i],i) for i in range(len(W))]
-    print(W)
-    sorted(W, reverse = True)
-    print("Pick alternative a"+ str(W[0][1]))
+    
+    W = sorted(W, reverse = True)
+    print("Choose alternative a"+ str(W[0][1]))

@@ -18,32 +18,48 @@ def matrix_factorization(data, K, steps=5000, beta=0.0002, lamda=0.02):
     #W = np.random.normal(scale=1./K, size = (data.shape[0], K))
     #H = np.random.normal(scale=1./K, size = (data.shape[1], K))
     
+    b = np.mean(data[np.where(data != 0)])
     
     H = H.T
-
     b_u = np.zeros(data.shape[0])
-    
     for i in range(len(data)):
-        #print("len",len(np.where(data[i] != 0)[0]))
-        if(len(np.where(data[i] != 0)[0]) == 0):
+        count = 0    
+        for j in range(len(data[i])):
+            if (data[i][j] != 0):
+                b_u[i] += data[i][j]
+                count += 1
+        if (count == 0):
             b_u[i] = 0
         else:
-            b_u[i] = np.mean(data[i][np.where(data[i] != 0)])
+            b_u[i] /= count
+        #print("len",len(np.where(data[i] != 0)[0]))
+        #if(len(np.where(data[i] != 0)[0]) == 0):
+        #    b_u[i] = 0
+        #else:
+            
+        #    b_u[i] = np.mean(data[i][np.where(data[i] != 0)])
         #print(b_u[i])
     
     b_i = np.zeros(data.shape[1])
     for i in range(len(data.T)):
-        if(len(np.where(data.T[i] != 0)[0]) == 0):
+        count = 0            
+        for j in range(len(data.T[i])):
+            if (data.T[i][j] != 0):
+                b_i[i] += data.T[i][j]
+                count += 1
+        if (count == 0):
             b_i[i] = 0
         else:
-            b_i[i] = np.mean(data.T[i][np.where(data.T[i] != 0)])
-        
-
+            b_i[i] /= count
+    
+    #for i in range(len(data.T)):
+     #   if(len(np.where(data.T[i] != 0)[0]) == 0):
+      #      b_i[i] = 0
+       # else:
+        #    b_i[i] = np.mean(data.T[i][np.where(data.T[i] != 0)])
         #b_i[i] = np.mean(data.T[i][np.where(data.T[i] != 0)])
         #print(b_i[i])
     
-    b = np.mean(data[np.where(data != 0)])
-
     #i : user
     #j : item
     
@@ -52,9 +68,7 @@ def matrix_factorization(data, K, steps=5000, beta=0.0002, lamda=0.02):
             for j in range(len(data[i])):
                 if data[i][j] > 0:
                     p_bar = b + b_u[i] + b_i[j] + np.dot(W[i,:],H[:,j])
-                    
                     eij = data[i][j] - p_bar
-
                     b = b + beta * eij
 
                     b_u[i] += beta * (eij - lamda * b_u[i])
